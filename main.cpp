@@ -212,10 +212,6 @@ QString getDeviceInfo(QString letter)
 
                         QString deviceID = getDeviceID(spdd.DevInst);
                         qInfo()<<"deviceid:"<<deviceID;
-
-                        //QString f = "{sn:'%1',deviceid:'%2'}";
-                        //f = f.arg(info).arg(deviceID);
-                        //qInfo()<<f;
                     }
                 }
                 CloseHandle( hDrive );
