@@ -302,7 +302,8 @@ int main(int argc, char *argv[])
         QString strJson(byteArray);
         r =  strJson;
     }
-    qInfo() << r;
+    //qInfo() << r;
+    printf("%s",r.toLatin1().data());
     return 0;
     //return a.exec();
 }
