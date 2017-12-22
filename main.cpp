@@ -6,6 +6,8 @@
 #include <winioctl.h>
 #include <devguid.h>
 #include <cfgmgr32.h>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 QString getDriveInfo(QString & tdrive)
 {
@@ -206,12 +208,25 @@ QString getDeviceInfo(QString letter)
 
                     if ( usbDeviceNumber == volumeDeviceNumber )
                     {
-
                         QString info = QString::fromUtf16((ushort*)pspdidd->DevicePath);
-                        qInfo()<< "sn:" << info;
+                        //qInfo()<< "sn:" << info;
 
                         QString deviceID = getDeviceID(spdd.DevInst);
-                        qInfo()<<"deviceid:"<<deviceID;
+                        //qInfo()<<"deviceid:"<<deviceID;
+
+                        QJsonObject json;
+                        json.insert("status", 1);
+                        json.insert("sn", info);
+                        json.insert("deviceid", deviceID);
+                         json.insert("volume", letter);
+
+                        // 构建 JSON 文档
+                        QJsonDocument document;
+                        document.setObject(json);
+                        QByteArray byteArray = document.toJson(QJsonDocument::Compact);
+                        QString strJson(byteArray);
+
+                        return strJson;
                     }
                 }
                 CloseHandle( hDrive );
@@ -264,10 +279,30 @@ void getAllDevices(){
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    QString path;
+    if(argc > 1){
+        path = QString(QLatin1String(argv[1]));
+        //qDebug() <<path;
+    }else{
+        path = QCoreApplication::applicationDirPath();
+        path = path.left(path.indexOf("/"));
+    }
 
-    QString path = QCoreApplication::applicationDirPath();
-    path = path.left(path.indexOf("/"));
-    getDeviceInfo(path);
+    QString r = getDeviceInfo(path);
+    if(r.length() == 0){
+       QJsonObject json;
+       json.insert("status", 0);
+       json.insert("msg", "not found usb serial number");
+       json.insert("volume", path);
+
+        // 构建 JSON 文档
+        QJsonDocument document;
+        document.setObject(json);
+        QByteArray byteArray = document.toJson(QJsonDocument::Compact);
+        QString strJson(byteArray);
+        r =  strJson;
+    }
+    qInfo() << r;
     return 0;
     //return a.exec();
 }
